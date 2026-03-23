@@ -17,6 +17,45 @@ This project estimates manufacturing equipment output (units produced) from thre
 - `Pressure`
 - `Runtime`
 
+## Exact Project Summary (As Requested)
+This project predicts manufacturing output (units produced) from three machine conditions:
+
+Temperature
+Pressure
+Runtime
+It is a full ML app with 3 layers:
+
+Training script in training/train.py
+Prediction API in backend/main.py
+Web interface in frontend/app.py
+How it works end-to-end:
+
+The model is trained and saved as files in model/model.pkl and model/scaler.pkl.
+FastAPI loads those files and serves prediction through /predict in backend/main.py.
+Streamlit sends user inputs to the API and shows predicted units in frontend/app.py.
+The app also shows model quality metrics from model/metrics.json, currently:
+R2 score: 0.993139
+MAE: 4.655368
+
+## Detailed Explanation of the Same Information
+- **Business objective**: Estimate equipment output in units produced using machine operating conditions.
+- **Input features**: Temperature, Pressure, and Runtime are the three model inputs used for every prediction request.
+- **Training layer (`training/train.py`)**:
+	- Prepares training data.
+	- Splits into train and test sets.
+	- Scales inputs using `StandardScaler`.
+	- Trains a `LinearRegression` model.
+	- Saves `model.pkl`, `scaler.pkl`, and `metrics.json` to the `model/` directory.
+- **API layer (`backend/main.py`)**:
+	- Loads model artifacts on startup.
+	- Exposes `/predict` for inference and `/model-metrics` for model quality values.
+	- Returns predicted `Units_Produced` for user-provided inputs.
+- **Web app layer (`frontend/app.py`)**:
+	- Collects user input with Streamlit controls.
+	- Calls backend `/predict` and shows predicted units.
+	- Reads backend metrics response and displays R2 and MAE in the UI.
+- **Current reported model quality** (from `model/metrics.json`): R2 = 0.993139 and MAE = 4.655368.
+
 It has three connected parts:
 - **Training Layer** (`training/train.py`): Trains a regression model and exports artifacts.
 - **API Layer** (`backend/main.py`): Loads model artifacts and serves predictions through FastAPI endpoints.
