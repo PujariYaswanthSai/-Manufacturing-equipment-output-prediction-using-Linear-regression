@@ -1,0 +1,9 @@
+{
+  "model_name": "LinearRegression",
+  "r2_score": 0.993139,
+  "mae": 4.655368,
+  "train_samples": 2400,
+  "test_samples": 600,
+  "trained_with": "scikit-learn",
+  "trained_in": "Google Colab and local Python environments"
+}

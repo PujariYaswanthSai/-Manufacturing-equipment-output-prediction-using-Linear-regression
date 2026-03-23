@@ -3,11 +3,24 @@ import requests
 
 # Define the backend API URL
 API_URL = "http://127.0.0.1:8000/predict"
+METRICS_URL = "http://127.0.0.1:8000/model-metrics"
 
 st.set_page_config(page_title="Manufacturing Output Predictor", layout="centered")
 
 st.title("🏭 Manufacturing Equipment Output Prediction")
 st.write("Predict the number of units produced based on equipment operating parameters.")
+
+try:
+    metrics_response = requests.get(METRICS_URL, timeout=5)
+    if metrics_response.status_code == 200:
+        metrics = metrics_response.json()
+        if metrics.get("available") and "r2_score" in metrics:
+            col1, col2 = st.columns(2)
+            col1.metric("Model R² (Test)", f"{metrics.get('r2_score', 0.0):.4f}")
+            col2.metric("Model MAE (Test)", f"{metrics.get('mae', 0.0):.2f}")
+            st.caption(f"Model: {metrics.get('model_name', 'Unknown')}")
+except requests.exceptions.RequestException:
+    st.info("Model metrics are unavailable. Start the backend server to view current model accuracy.")
 
 st.sidebar.header("Equipment Parameters")
 
