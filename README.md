@@ -8,6 +8,9 @@ This project implements a Machine Learning solution to predict the output (units
 - **Interactive UI**: A Streamlit dashboard where users can input parameters using simple sliders to obtain a real-time prediction output.
 - **Ready for Deployment**: Includes a `render.yaml` specification for 1-click cloud deployments on Render.
 
+## Model Training Environment
+Model training was performed in **Google Colab** as well as locally. The training logic is available in `training/train.py`, and the generated artifacts are stored in the `model/` directory (`model.pkl` and `scaler.pkl`).
+
 ## Project Structure
 ```text
 pro1/
@@ -28,26 +31,47 @@ pro1/
 └── README.md                # Project documentation
 ```
 
-## Running the Application Locally
+## Running the Project Locally
 
-### 1. Install Dependencies
-Make sure you have Python 3 installed. Install the requirements via pip:
+### 1. Clone the Repository
+```bash
+git clone <your-repo-url>
+cd Manufacturing-equipment-output-prediction-using-Linear-regression
+```
+
+### 2. Create and Activate a Virtual Environment (Recommended)
+```bash
+python -m venv .venv
+```
+
+On Windows (PowerShell):
+```bash
+.venv\Scripts\Activate.ps1
+```
+
+On macOS/Linux:
+```bash
+source .venv/bin/activate
+```
+
+### 3. Install Dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. Start the FastAPI Backend
-Start the prediction server. It will run locally at `http://127.0.0.1:8000`.
+### 4. Run the FastAPI Backend
+From the project root:
 ```bash
-uvicorn backend.main:app --reload
+uvicorn backend.main:app --host 127.0.0.1 --port 8000 --reload
 ```
+Backend docs will be available at `http://127.0.0.1:8000/docs`.
 
-### 3. Start the Streamlit Frontend
-Open a new terminal session in the project directory and run:
+### 5. Run the Streamlit Frontend
+Open a **new terminal** in the same project root and run:
 ```bash
-streamlit run frontend/app.py
+streamlit run frontend/app.py --server.address 127.0.0.1 --server.port 8501
 ```
-This will automatically open your default browser and load the Streamlit web app (usually at `http://localhost:8501`).
+Then open `http://127.0.0.1:8501` in your browser.
 
 ## Training the Model
 If you'd like to retrain the model or alter the synthetic data generation logic, simply run:
@@ -55,6 +79,8 @@ If you'd like to retrain the model or alter the synthetic data generation logic,
 python training/train.py
 ```
 This automatically updates the `.pkl` files inside the `model/` folder. Be sure to restart the FastAPI backend if you change the model.
+
+If training in Google Colab, export the updated `model.pkl` and `scaler.pkl` files and replace the files in the local `model/` directory before starting the backend.
 
 ## Deployment
 This project is configured for cloud deployment. You can easily host it on [Render](https://render.com) by linking this repository. Render will automatically detect the `render.yaml` file, spin up a web service for the FastAPI backend, and another web service for the Streamlit UI.
