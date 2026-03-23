@@ -11,6 +11,23 @@ This project implements a Machine Learning solution to predict the output (units
 ## Model Training Environment
 Model training was performed in **Google Colab** as well as locally. The training logic is available in `training/train.py`, and the generated artifacts are stored in the `model/` directory (`model.pkl` and `scaler.pkl`).
 
+## What This Project Does
+This project estimates manufacturing equipment output (units produced) from three operating parameters:
+- `Temperature`
+- `Pressure`
+- `Runtime`
+
+It has three connected parts:
+- **Training Layer** (`training/train.py`): Trains a regression model and exports artifacts.
+- **API Layer** (`backend/main.py`): Loads model artifacts and serves predictions through FastAPI endpoints.
+- **Web App Layer** (`frontend/app.py`): Lets users enter machine parameters and view predicted output and model metrics.
+
+Typical runtime flow:
+1. Train and export model files into the `model/` folder.
+2. FastAPI loads the model and scaler on startup.
+3. Streamlit sends user input to `/predict` and shows the predicted units.
+4. Streamlit fetches `/model-metrics` to display test metrics such as R2 and MAE.
+
 ## Project Structure
 ```text
 pro1/
@@ -81,6 +98,23 @@ python training/train.py
 This automatically updates the `.pkl` files inside the `model/` folder. Be sure to restart the FastAPI backend if you change the model.
 
 If training in Google Colab, export the updated `model.pkl` and `scaler.pkl` files and replace the files in the local `model/` directory before starting the backend.
+
+## How Training Works with CSV Data
+Current state:
+- The existing `training/train.py` script generates **synthetic data** using NumPy.
+- There is currently no CSV dataset committed in this repository.
+
+How CSV-based training would work with the same pipeline:
+1. Load CSV using pandas (for example: `df = pd.read_csv("your_file.csv")`).
+2. Set feature columns as `Temperature`, `Pressure`, and `Runtime`.
+3. Set target column as `Units_Produced`.
+4. Perform train-test split (`train_test_split`).
+5. Scale features using `StandardScaler`.
+6. Train a `LinearRegression` model.
+7. Evaluate using R2 and MAE.
+8. Save `model.pkl`, `scaler.pkl`, and `metrics.json` in the `model/` folder.
+
+This means the backend and frontend code can remain unchanged as long as the exported artifacts keep the same names and schema.
 
 ## Deployment
 This project is configured for cloud deployment. You can easily host it on [Render](https://render.com) by linking this repository. Render will automatically detect the `render.yaml` file, spin up a web service for the FastAPI backend, and another web service for the Streamlit UI.
