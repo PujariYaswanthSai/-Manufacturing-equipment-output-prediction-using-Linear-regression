@@ -1,159 +1,126 @@
 # Manufacturing Equipment Output Prediction
 
-This project implements a Machine Learning solution to predict the output (units produced) of manufacturing equipment based on operating parameters. It uses a **Linear Regression** model served by a **FastAPI** backend and provides an interactive user interface built with **Streamlit**.
+This project predicts manufacturing output (`Parts_Per_Hour`) from process, machine, material, and time context features.
 
-## Features
-- **Machine Learning Model**: Trained on equipment parameters (`Temperature`, `Pressure`, `Runtime`) using `scikit-learn`'s Linear Regression algorithm.
-- **RESTful API Backend**: A high-performance Python backend powered by FastAPI that loads the trained `.pkl` models to serve secure predictions natively.
-- **Interactive UI**: A Streamlit dashboard where users can input parameters using simple sliders to obtain a real-time prediction output.
-- **Ready for Deployment**: Includes a `render.yaml` specification for 1-click cloud deployments on Render.
+It includes:
+- A training pipeline in `training/train.py`
+- A FastAPI inference API in `backend/main.py`
+- A Streamlit UI in `frontend/app.py`
 
-## Model Training Environment
-Model training was performed in **Google Colab** as well as locally. The training logic is available in `training/train.py`, and the generated artifacts are stored in the `model/` directory (`model.pkl` and `scaler.pkl`).
+## Current Model
+- Model: `LinearRegression`
+- Preprocessing: `ColumnTransformer`
+  - Numeric features scaled with `StandardScaler`
+  - Categorical features encoded with `OneHotEncoder(handle_unknown="ignore")`
+- Target: `Parts_Per_Hour`
+- Data source: `training/manufacturing_dataset_1000_samples.csv`
 
-## What This Project Does
-This project estimates manufacturing equipment output (units produced) from three operating parameters:
-- `Temperature`
-- `Pressure`
-- `Runtime`
+### Latest Metrics
+From `model/metrics.json`:
+- `r2_score`: `0.933089`
+- `mae`: `2.498103`
+- `train_samples`: `408`
+- `test_samples`: `102`
+- `feature_count`: `21`
 
-## Exact Project Summary (As Requested)
-This project predicts manufacturing output (units produced) from three machine conditions:
+## Input Schema Used for Training
+CSV columns:
+- `Timestamp`
+- `Injection_Temperature`
+- `Injection_Pressure`
+- `Cycle_Time`
+- `Cooling_Time`
+- `Material_Viscosity`
+- `Ambient_Temperature`
+- `Machine_Age`
+- `Operator_Experience`
+- `Maintenance_Hours`
+- `Shift`
+- `Machine_Type`
+- `Material_Grade`
+- `Day_of_Week`
+- `Temperature_Pressure_Ratio`
+- `Total_Cycle_Time`
+- `Efficiency_Score`
+- `Machine_Utilization`
+- `Parts_Per_Hour` (target)
 
-Temperature
-Pressure
-Runtime
-It is a full ML app with 3 layers:
-
-Training script in training/train.py
-Prediction API in backend/main.py
-Web interface in frontend/app.py
-How it works end-to-end:
-
-The model is trained and saved as files in model/model.pkl and model/scaler.pkl.
-FastAPI loads those files and serves prediction through /predict in backend/main.py.
-Streamlit sends user inputs to the API and shows predicted units in frontend/app.py.
-The app also shows model quality metrics from model/metrics.json, currently:
-R2 score: 0.993139
-MAE: 4.655368
-
-## Detailed Explanation of the Same Information
-- **Business objective**: Estimate equipment output in units produced using machine operating conditions.
-- **Input features**: Temperature, Pressure, and Runtime are the three model inputs used for every prediction request.
-- **Training layer (`training/train.py`)**:
-	- Prepares training data.
-	- Splits into train and test sets.
-	- Scales inputs using `StandardScaler`.
-	- Trains a `LinearRegression` model.
-	- Saves `model.pkl`, `scaler.pkl`, and `metrics.json` to the `model/` directory.
-- **API layer (`backend/main.py`)**:
-	- Loads model artifacts on startup.
-	- Exposes `/predict` for inference and `/model-metrics` for model quality values.
-	- Returns predicted `Units_Produced` for user-provided inputs.
-- **Web app layer (`frontend/app.py`)**:
-	- Collects user input with Streamlit controls.
-	- Calls backend `/predict` and shows predicted units.
-	- Reads backend metrics response and displays R2 and MAE in the UI.
-- **Current reported model quality** (from `model/metrics.json`): R2 = 0.993139 and MAE = 4.655368.
-
-It has three connected parts:
-- **Training Layer** (`training/train.py`): Trains a regression model and exports artifacts.
-- **API Layer** (`backend/main.py`): Loads model artifacts and serves predictions through FastAPI endpoints.
-- **Web App Layer** (`frontend/app.py`): Lets users enter machine parameters and view predicted output and model metrics.
-
-Typical runtime flow:
-1. Train and export model files into the `model/` folder.
-2. FastAPI loads the model and scaler on startup.
-3. Streamlit sends user input to `/predict` and shows the predicted units.
-4. Streamlit fetches `/model-metrics` to display test metrics such as R2 and MAE.
+Derived timestamp features used internally:
+- `Timestamp_Hour`
+- `Timestamp_Day`
+- `Timestamp_Month`
+- `Timestamp_DayOfWeek`
 
 ## Project Structure
 ```text
-pro1/
-│
-├── backend/
-│   └── main.py              # FastAPI application and prediction endpoint
-├── frontend/
-│   └── app.py               # Streamlit interactive dashboard
-├── model/
-│   ├── model.pkl            # Serialized Linear Regression Model
-│   └── scaler.pkl           # Serialized StandardScaler
-├── training/
-│   └── train.py             # Script to generate synthetic data and train the model
-│
-├── requirements.txt         # Project dependencies
-├── render.yaml              # Render.com deployment configuration
-├── .gitignore               # Git ignored files
-└── README.md                # Project documentation
+this4/
+  backend/
+    main.py
+  frontend/
+    app.py
+  model/
+    model.pkl
+    scaler.pkl
+    metrics.json
+  training/
+    manufacturing_dataset_1000_samples.csv
+    train.py
+  requirements.txt
+  render.yaml
+  README.md
 ```
 
-## Running the Project Locally
-
-### 1. Clone the Repository
-```bash
-git clone <your-repo-url>
-cd Manufacturing-equipment-output-prediction-using-Linear-regression
-```
-
-### 2. Create and Activate a Virtual Environment (Recommended)
-```bash
+## Local Setup
+### 1. Create and activate virtual environment
+Windows PowerShell:
+```powershell
 python -m venv .venv
-```
-
-On Windows (PowerShell):
-```bash
 .venv\Scripts\Activate.ps1
 ```
 
-On macOS/Linux:
-```bash
-source .venv/bin/activate
-```
-
-### 3. Install Dependencies
-```bash
+### 2. Install dependencies
+```powershell
 pip install -r requirements.txt
 ```
 
-### 4. Run the FastAPI Backend
-From the project root:
-```bash
-uvicorn backend.main:app --host 127.0.0.1 --port 8000 --reload
-```
-Backend docs will be available at `http://127.0.0.1:8000/docs`.
-
-### 5. Run the Streamlit Frontend
-Open a **new terminal** in the same project root and run:
-```bash
-streamlit run frontend/app.py --server.address 127.0.0.1 --server.port 8501
-```
-Then open `http://127.0.0.1:8501` in your browser.
-
-## Training the Model
-If you'd like to retrain the model or alter the synthetic data generation logic, simply run:
-```bash
+### 3. Train model from CSV
+```powershell
+$env:DATASET_PATH = "./training/manufacturing_dataset_1000_samples.csv"
 python training/train.py
 ```
-This automatically updates the `.pkl` files inside the `model/` folder. Be sure to restart the FastAPI backend if you change the model.
 
-If training in Google Colab, export the updated `model.pkl` and `scaler.pkl` files and replace the files in the local `model/` directory before starting the backend.
+Artifacts are written to:
+- `model/model.pkl`
+- `model/scaler.pkl`
+- `model/metrics.json`
 
-## How Training Works with CSV Data
-Current state:
-- The existing `training/train.py` script generates **synthetic data** using NumPy.
-- There is currently no CSV dataset committed in this repository.
+### 4. Start backend
+From project root:
+```powershell
+uvicorn backend.main:app --host 127.0.0.1 --port 8000
+```
 
-How CSV-based training would work with the same pipeline:
-1. Load CSV using pandas (for example: `df = pd.read_csv("your_file.csv")`).
-2. Set feature columns as `Temperature`, `Pressure`, and `Runtime`.
-3. Set target column as `Units_Produced`.
-4. Perform train-test split (`train_test_split`).
-5. Scale features using `StandardScaler`.
-6. Train a `LinearRegression` model.
-7. Evaluate using R2 and MAE.
-8. Save `model.pkl`, `scaler.pkl`, and `metrics.json` in the `model/` folder.
+API docs:
+- `http://127.0.0.1:8000/docs`
 
-This means the backend and frontend code can remain unchanged as long as the exported artifacts keep the same names and schema.
+### 5. Start frontend
+In a new terminal from project root:
+```powershell
+streamlit run frontend/app.py --server.address 127.0.0.1 --server.port 8501
+```
+
+UI URL:
+- `http://127.0.0.1:8501`
+
+## API Endpoints
+- `GET /` health/welcome message
+- `GET /model-metrics` returns training metrics
+- `POST /predict` returns:
+  - `Units_Produced`
+
+### Prediction Behavior Notes
+- Backend normalizes category aliases to training labels (for example `Morning -> Day`, `Type-A -> Type_A`).
+- Backend enforces non-negative prediction output by clamping at `0.0`.
 
 ## Deployment
-This project is configured for cloud deployment. You can easily host it on [Render](https://render.com) by linking this repository. Render will automatically detect the `render.yaml` file, spin up a web service for the FastAPI backend, and another web service for the Streamlit UI.
+`render.yaml` is included for deployment on Render.
